@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.itjsz.shirojwt.mapper.SysMenuMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="net.itjsz.shirojwt.entity.SysMenu" id="sysMenuMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="url" column="url"/>
+        <result property="perms" column="perms"/>
+        <result property="type" column="type"/>
+        <result property="icon" column="icon"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createId" column="create_id"/>
+        <result property="updateId" column="update_id"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="all">
+        sm.id,sm.parent_id,sm.name,sm.url,sm.perms,sm.type,sm.icon,sm.order_num,sm.create_time,sm.update_time,sm.create_id,sm.update_id
+    </sql>
+
+    <select id="findAll" resultMap="sysMenuMap">
+        SELECT <include refid="all"/>
+        FROM sys_menu AS sm
+        WHERE deleted = 0
+    </select>
+
+    <select id="findMenusByR" resultMap="sysMenuMap" parameterType="long">
+        SELECT <include refid="all"/>
+        FROM sys_menu AS sm
+        INNER JOIN sys_role_menu AS srm ON sm.id = srm.menu_id
+        INNER JOIN sys_role AS sr ON sr.id = srm.role_id
+        WHERE sr.id = 1 AND sr.deleted = 0 AND sm.deleted = 0
+    </select>
+
+</mapper>

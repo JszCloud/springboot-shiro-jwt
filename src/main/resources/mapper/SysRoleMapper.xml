@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.itjsz.shirojwt.mapper.SysRoleMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="net.itjsz.shirojwt.entity.SysRole" id="sysRoleMap">
+        <result property="id" column="id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createId" column="create_id"/>
+        <result property="updateId" column="update_id"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="all">
+        sr.id,sr.role_name,sr.remark,sr.create_time,sr.update_time,sr.create_id,sr.update_id,sr.deleted
+    </sql>
+    
+    <sql id="where">
+        <if test="id != null">
+            role_name = #{roleName}
+        </if>
+        <if test="createTime != null">
+            AND create_time = #{createTime}
+        </if>
+        <if test="updateTime != null">
+            AND update_time = #{updateTime}
+        </if>
+        <if test="createId != null">
+            AND create_id = #{createId}
+        </if>
+        <if test="updateId != null">
+            AND update_id = #{updateId}
+        </if>
+        <if test="deleted != null">
+            AND deleted = #{deleted}
+        </if>
+    </sql>
+
+    <!--根据entity 查询单条记录-->
+    <select id="findById" resultType="net.itjsz.shirojwt.entity.SysRole" parameterType="net.itjsz.shirojwt.entity.SysRole">
+        SELECT <include refid="all"/>
+        FROM sys_role
+        <where>
+            <include refid="where"/>
+        </where>
+
+    </select>
+
+    <!--根据entity 查询多条记录-->
+    <select id="findAllByT" resultMap="sysRoleMap" parameterType="net.itjsz.shirojwt.entity.SysRole">
+        SELECT <include refid="all"/>
+        FROM sys_role
+        <where>
+            <include refid="where"/>
+        </where>
+
+    </select>
+
+    <!--单条数据插入-->
+    <insert id="inster">
+
+    </insert>
+
+    <!--根据entity 逻辑删除单条记录-->
+    <update id="delete">
+
+    </update>
+
+    <!--根据entity 修改单条数据-->
+    <update id="update">
+
+    </update>
+
+    
+    <select id="findRolesByU" resultMap="sysRoleMap" parameterType="long">
+        SELECT <include refid="all"/>
+        FROM sys_role AS sr
+        INNER JOIN sys_user_role AS sur ON sr.id = sur.role_id
+        INNER JOIN sys_user AS su ON su.id = sur.user_id
+        WHERE su.id = 1 AND su.deleted = 0 AND sr.deleted = 0
+    </select>
+
+
+</mapper>
