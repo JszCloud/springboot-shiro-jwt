@@ -5,6 +5,7 @@ import net.itjsz.shirojwt.common.util.JWTUtil;
 import net.itjsz.shirojwt.entity.SysUser;
 import net.itjsz.shirojwt.service.ShiroService;
 import net.itjsz.shirojwt.service.SysUserService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -13,6 +14,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
@@ -110,6 +112,16 @@ public class JWTRealm extends AuthorizingRealm {
         authorizationInfo.addStringPermissions(permsSet);
 
         return authorizationInfo;
+    }
+
+    /**
+     * 清空当前用户权限信息
+     */
+    public void clearCachedAuthorizationInfo() {
+        PrincipalCollection principalCollection = SecurityUtils.getSubject().getPrincipals();
+        SimplePrincipalCollection principals = new SimplePrincipalCollection(
+                principalCollection, getName());
+        super.clearCachedAuthorizationInfo(principals);
     }
 
 }

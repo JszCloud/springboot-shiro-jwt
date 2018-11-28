@@ -16,6 +16,7 @@ import net.itjsz.shirojwt.common.util.JWTUtil;
 import net.itjsz.shirojwt.entity.SysUser;
 import net.itjsz.shirojwt.mapper.SysUserMapper;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +37,11 @@ public class LoginController {
         String salt = sysUser.getSalt();
         //原密码
         String encodedPassword = ShiroKit.md5(password, username + salt);
+        RedisManager redisManager =new RedisManager();
         if (sysUser.getPassword().equals(encodedPassword)) {
-            return new Result<String>("登录成功",200,JWTUtil.sign(username,encodedPassword));
+            String token = JWTUtil.sign(username,encodedPassword);
+            redisManager.set(("token:"+sysUser.getUsername()).getBytes(),token.getBytes());
+            return new Result<String>("登录成功",200,token);
         } else {
             throw new UnauthorizedException();
         }

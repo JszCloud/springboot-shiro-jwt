@@ -2,6 +2,7 @@ package net.itjsz.shirojwt.config;
 
 import com.oracle.tools.packager.Log;
 import lombok.extern.slf4j.Slf4j;
+import net.itjsz.shirojwt.common.bean.RedisBean;
 import net.itjsz.shirojwt.common.shiro.JWTFilter;
 import net.itjsz.shirojwt.common.shiro.JWTRealm;
 import net.itjsz.shirojwt.entity.SysMenu;
@@ -14,10 +15,14 @@ import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSource
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.crazycake.shiro.RedisCacheManager;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
 import java.util.LinkedHashMap;
@@ -37,6 +42,7 @@ import java.util.Map;
 @Configuration
 @Slf4j
 public class ShiroConfig {
+
 
     /**
      * ShiroFilterFactoryBean 处理拦截资源文件问题。
@@ -86,12 +92,12 @@ public class ShiroConfig {
     }
 
     @Bean
-    public SecurityManager securityManager() {
+    public SecurityManager securityManager(RedisCacheManager cacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         // 设置realm.
         securityManager.setRealm(jwtRealm());
         //注入缓存管理器
-        securityManager.setCacheManager(ehCacheManager());
+        securityManager.setCacheManager(cacheManager);
 
         /*
          * 关闭shiro自带的session，详情见文档
@@ -142,17 +148,35 @@ public class ShiroConfig {
         return authorizationAttributeSourceAdvisor;
     }
 
+
     /**
-     * shiro缓存管理器;
-     * 需要注入到安全管理器：securityManager中
+     * 配置shiro redisManager
+     *
      * @return
      */
     @Bean
-    public EhCacheManager ehCacheManager() {
-        EhCacheManager cacheManager = new EhCacheManager();
-        cacheManager.setCacheManagerConfigFile("classpath:ehcache.xml");
-        return cacheManager;
+    public RedisManager redisManager(RedisBean redis) {
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost(redis.getHost());
+        redisManager.setPort(redis.getPort());
+        redisManager.setExpire(redis.getExpire());// 配置过期时间
+        redisManager.setTimeout(redis.getTimeout());
+        redisManager.setPassword(redis.getPassword());
+
+        return redisManager;
     }
+    /**
+     * cacheManager 缓存 redis实现
+     *
+     * @return
+     */
+    @Bean
+    public RedisCacheManager cacheManager(RedisManager redisManager) {
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        redisCacheManager.setRedisManager(redisManager);
+        return redisCacheManager;
+    }
+
 
 
 }
